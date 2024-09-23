@@ -6,45 +6,16 @@
 #include "../logging/logging.h"
 #include "../new_pins.h"
 #include "../cmnds/cmd_public.h"
-#include "drv_bl_shared.h"
 #include "drv_pwrCal.h"
 #include "drv_spi.h"
 #include "drv_uart.h"
 
-static unsigned short hlw8112_baudRate = 4800;
-
-#define HLW8112_UART_RECEIVE_BUFFER_SIZE 256
-#define HLW8112_UART_ADDR 0 // 0 - 3
-#define HLW8112_UART_CMD_READ(addr) (0x58 | addr)
-#define HLW8112_UART_CMD_WRITE(addr) (0xA8 | addr)
-#define HLW8112_UART_REG_PACKET 0xAA
-#define HLW8112_UART_PACKET_HEAD 0x55
-#define HLW8112_UART_PACKET_LEN 23
-
 // Datasheet says 900 kHz is supported, but it produced ~50% check sum errors  
-#define HLW8112_SPI_BAUD_RATE 800000 // 900000
-#define HLW8112_SPI_CMD_READ 0x58
-#define HLW8112_SPI_CMD_WRITE 0xA8
-
-// Electric parameter register (read only)
-#define HLW8112_REG_I_RMS 0x03
-#define HLW8112_REG_V_RMS 0x04
-#define HLW8112_REG_WATT 0x06
-#define HLW8112_REG_CF_CNT 0x7
-#define HLW8112_REG_FREQ 0x08
-#define HLW8112_REG_USR_WRPROT 0x1D
-#define HLW8112_USR_WRPROT_DISABLE 0x55
-
-// User operation register (read and write)
-#define HLW8112_REG_MODE 0x19
-#define HLW8112_MODE_DEFAULT 0x87
-#define HLW8112_MODE_RMS_UPDATE_SEL_800_MS (1 << 3)
+#define HLW8112_SPI_BAUD_RATE 1000000  // 900000
 
 #define DEFAULT_VOLTAGE_CAL 15188
 #define DEFAULT_CURRENT_CAL 251210
 #define DEFAULT_POWER_CAL 598
-
-#define CF_CNT_INVALID (1 << 31)
 
 typedef struct {
     uint32_t i_rms;
@@ -211,7 +182,6 @@ static int SPI_WriteReg(uint8_t reg, uint32_t val) {
 static void HLW8112_Init(void) {
     PrevCfCnt = CF_CNT_INVALID;
 
-    BL_Shared_Init();
 
     PwrCal_Init(PWR_CAL_DIVIDE, DEFAULT_VOLTAGE_CAL, DEFAULT_CURRENT_CAL,
                 DEFAULT_POWER_CAL);
@@ -249,15 +219,11 @@ void HLW8112_SPI_Init(void) {
 	cfg.role = SPI_ROLE_MASTER;
 	cfg.bit_width = SPI_BIT_WIDTH_8BITS;
 	cfg.polarity = SPI_POLARITY_LOW;
-	cfg.phase = SPI_PHASE_2ND_EDGE;
-	cfg.wire_mode = SPI_3WIRE_MODE;
+	cfg.phase = SPI_PHASE_1ST_EDGE;
+	cfg.wire_mode = SPI_4WIRE_MODE;
 	cfg.baud_rate = HLW8112_SPI_BAUD_RATE;
 	cfg.bit_order = SPI_MSB_FIRST;
 	SPI_Init(&cfg);
-
-    SPI_WriteReg(HLW8112_REG_USR_WRPROT, HLW8112_USR_WRPROT_DISABLE);
-    SPI_WriteReg(HLW8112_REG_MODE,
-                 HLW8112_MODE_DEFAULT | HLW8112_MODE_RMS_UPDATE_SEL_800_MS);
 }
 
 void HLW8112_SPI_RunEverySecond(void) {
