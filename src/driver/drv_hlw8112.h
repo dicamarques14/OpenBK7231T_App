@@ -13,6 +13,13 @@ void HLW8112_SPI_RunEverySecond(void);
 // HLW8112 I2C Address (Adjust as necessary)
 #define HLW8112_ADDR 0x5A
 
+#define HLW8112_REG_SPECIAL             0xEA    // Special command operations
+#define HLW8112_COMMAND_WRITE_EN        0xE5    // Special command operations
+#define HLW8112_COMMAND_WRITE_PROTECT   0xDC    // Special command operations
+#define HLW8112_COMMAND_SELECT_CH_A     0x5A    // Special command operations
+#define HLW8112_COMMAND_SELECT_CH_B     0xA5    // Special command operations
+#define HLW8112_COMMAND_RESET           0x96    // Special command operations
+
 // Register addresses
 #define HLW8112_REG_SYSCON          0x00    // System Control Register
 #define HLW8112_REG_EMUCON          0x01    // Meter Control Register
