@@ -6,7 +6,7 @@
 
 //Start with all driver flags undefined
 
-//ENABLE_NTP - Enable support for Test drivers, NTP and HttpButton
+ENABLE_NTP - Enable support for Test drivers, NTP and HttpButton
 //ENABLE_DRIVER_LED - Enable support for all LED drivers
 //ENABLE_I2C - Enable support for I2C
 //ENABLE_DRIVER_BL0937 - Enable support for BL0937
